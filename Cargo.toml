@@ -1,0 +1,12 @@
+[package]
+name = "chrome-driver"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chromiumoxide = "0.9"
+thiserror = "2"
+sysinfo = "0.38"
+futures = "0.3"
+log = "0.4"
+tokio = { version = "1", features = ["rt", "macros", "process", "io-util", "net"] }
