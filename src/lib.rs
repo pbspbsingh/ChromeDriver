@@ -1,5 +1,5 @@
 pub use chromiumoxide;
-pub use chromiumoxide::{Browser, Handler, Page};
+pub use chromiumoxide::{Browser, Handler, Page, Element};
 pub use chromiumoxide::error::CdpError;
 
 
