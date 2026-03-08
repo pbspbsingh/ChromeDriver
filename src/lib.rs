@@ -1,12 +1,14 @@
-pub use chromiumoxide;
-pub use chromiumoxide::{Browser, Handler, Page, Element};
-pub use chromiumoxide::error::CdpError;
+mod sleepable;
 
+pub use chromiumoxide;
+pub use chromiumoxide::error::CdpError;
+pub use chromiumoxide::{Browser, Element, Handler, Page};
 
 use futures::StreamExt;
 use log::{debug, info, warn};
+pub use sleepable::Sleepable;
 use std::path::PathBuf;
-use sysinfo::{RefreshKind, System};
+use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
 use thiserror::Error;
 
 // ── Errors ────────────────────────────────────────────────────────────────────
@@ -186,34 +188,35 @@ async fn init_browser(config: ChromeDriverConfig) -> Result<Browser, BrowserErro
 /// Scans running processes for a Chrome instance launched with
 /// `--remote-debugging-port` and connects to it.
 async fn try_connect_existing_session() -> Result<(Browser, Handler), BrowserError> {
-    let sys = System::new_with_specifics(RefreshKind::everything());
+    let mut sys = System::new();
+    sys.refresh_processes_specifics(
+        ProcessesToUpdate::All,
+        true,
+        ProcessRefreshKind::nothing().with_cmd(UpdateKind::Always),
+    );
+
+    debug!("Scanning {} processes for Chrome with debug port", sys.processes().len());
 
     let chrome_proc = sys
         .processes()
         .values()
         .filter(|p| {
-            p.cmd()
-                .first()
-                .map(|s| s.to_string_lossy().to_lowercase().contains("chrome"))
-                .unwrap_or(false)
+            let cmd = p.cmd().iter().map(|s| s.to_string_lossy().to_lowercase()).collect::<Vec<_>>().join(" ");
+            cmd.contains("chrome")
         })
         .find(|p| {
-            p.cmd()
-                .iter()
-                .any(|arg| arg.to_string_lossy().starts_with(REMOTE_DEBUG_ARG))
+            let cmd = p.cmd().iter().map(|s| s.to_string_lossy()).collect::<Vec<_>>().join(" ");
+            cmd.contains(REMOTE_DEBUG_ARG)
         })
         .ok_or(BrowserError::NoChromiumProcess)?;
 
-    debug!(
-        "Found Chrome process with debug enabled: {:?}",
-        chrome_proc.cmd()
-    );
+    let full_cmd = chrome_proc.cmd().iter().map(|s| s.to_string_lossy().into_owned()).collect::<Vec<_>>().join(" ");
+    debug!("Found Chrome process: {}", full_cmd);
 
-    let debug_arg = chrome_proc
-        .cmd()
-        .iter()
-        .map(|a| a.to_string_lossy().into_owned())
+    let debug_arg = full_cmd
+        .split_whitespace()
         .find(|a| a.starts_with(REMOTE_DEBUG_ARG))
+        .map(|s| s.to_owned())
         .ok_or(BrowserError::MissingDebugArg)?;
 
     let port_str = debug_arg
