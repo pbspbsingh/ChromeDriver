@@ -6,7 +6,7 @@ pub use chromiumoxide::{Browser, Element, Handler, Page};
 
 use futures::StreamExt;
 use log::{debug, info, warn};
-pub use sleepable::Sleepable;
+pub use sleepable::PageFeatures;
 use std::path::PathBuf;
 use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
 use thiserror::Error;
