@@ -13,12 +13,12 @@ pub trait PageFeatures {
 
 impl PageFeatures for Page {
     async fn nap(&self) -> &Self {
-        time::sleep(Duration::from_millis(rand::random_range(10..=100))).await;
+        time::sleep(Duration::from_millis(rand::random_range(20..=200))).await;
         self
     }
 
     async fn sleep(&self) -> &Self {
-        time::sleep(Duration::from_millis(rand::random_range(200..2000))).await;
+        time::sleep(Duration::from_millis(rand::random_range(200..=2000))).await;
         self
     }
 
