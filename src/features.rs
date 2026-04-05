@@ -18,7 +18,7 @@ impl PageFeatures for Page {
     }
 
     async fn sleep(&self) -> &Self {
-        time::sleep(Duration::from_millis(rand::random_range(200..=2000))).await;
+        time::sleep(Duration::from_millis(rand::random_range(500..=2000))).await;
         self
     }
 

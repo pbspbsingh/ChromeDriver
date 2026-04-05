@@ -1,4 +1,4 @@
-mod sleepable;
+mod features;
 
 pub use chromiumoxide;
 pub use chromiumoxide::error::CdpError;
@@ -6,7 +6,7 @@ pub use chromiumoxide::{Browser, Element, Handler, Page};
 
 use futures::StreamExt;
 use log::{debug, info, warn};
-pub use sleepable::PageFeatures;
+pub use features::PageFeatures;
 use std::path::PathBuf;
 use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
 use thiserror::Error;
